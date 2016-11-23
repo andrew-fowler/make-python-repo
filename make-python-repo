@@ -10,7 +10,6 @@ echo -e "${WHITE}Please enter the repo name to use (no spaces): ${NC}"
 read repo_name
 echo -e "${WHITE}Please enter your GitHub name (no spaces): ${NC}"
 read github_name
-echo -e "${WHITE}Andrew, your token is 71bd3ef3eaf3be117dc028f6e73196b6e4e3c596${NC}"
 echo -e "${WHITE}Please enter your GitHub API token (Create one via https://github.com/settings/tokens with 'repo' access): ${NC}"
 read github_token
 echo -e "${WHITE}Please enter your repo description${NC}"
