@@ -1,0 +1,100 @@
+#!/bin/bash
+RED='\033[0;31m'
+NC='\033[0m'
+WHITE='\033[1;37m'
+GREEN='\033[0;32m'
+COMMIT_MESG='Initial Commit'
+
+clear
+echo -e "${WHITE}Please enter the repo name to use (no spaces): ${NC}"
+read repo_name
+echo -e "${WHITE}Please enter your GitHub name (no spaces): ${NC}"
+read github_name
+echo -e "${WHITE}Andrew, your token is 71bd3ef3eaf3be117dc028f6e73196b6e4e3c596${NC}"
+echo -e "${WHITE}Please enter your GitHub API token (Create one via https://github.com/settings/tokens with 'repo' access): ${NC}"
+read github_token
+echo -e "${WHITE}Please enter your repo description${NC}"
+read repo_description
+
+function make_dir {
+    echo -e "${WHITE}Making directory: ${NC}./$1/"
+    mkdir $1
+}
+
+function goto_dir {
+    #echo -e "${WHITE}Going into directory: ${NC}./$1/"
+    cd $1
+}
+
+function download_gitignore {
+    echo -e "${WHITE}Downloading .gitignore to${NC} ./$1/.gitignore"
+    wget https://raw.githubusercontent.com/github/gitignore/master/Global/JetBrains.gitignore -O .gitignore > /dev/null 2>&1
+}
+
+function download_readme {
+    echo -e "${WHITE}Downloading README.md to${NC} ./$1/README.md"
+    wget https://gist.githubusercontent.com/PurpleBooth/109311bb0361f32d87a2/raw/824da51d0763e6855c338cc8107b2ff890e7dd43/README-Template.md -O README.md > /dev/null 2>&1
+    sed -i '' -e "s/Project Title/"$1"/g" ./README.md
+}
+
+function git_init {
+    echo -e "${WHITE}Initializing new Git repository in${NC} ./$1/"
+    git init  > /dev/null 2>&1
+}
+
+function git_add {
+    echo -e "${WHITE}Adding README.md and .gitignore for staging${NC}"
+    git add $1
+}
+
+function git_commit {
+    echo -e "${WHITE}Committing README.md and .gitignore${NC}"
+    git commit -m "$1" > /dev/null 2>&1
+}
+
+function create_remote_repo {
+  echo -e "${WHITE}Creating remote repo:${NC} https://github.com/$4/$2"
+  curl -XPOST -H "Authorization: token $1" https://api.github.com/user/repos -d '{"name":"'"$2"'","description":"'"$3"'"}' > /dev/null 2>&1
+}
+
+function git_add_origin {
+  echo -e "${WHITE}Adding remote origin:${NC} git@github.com:$1/$2.git"
+  git remote add origin git@github.com:$1/$2.git > /dev/null 2>&1
+}
+
+function git_push {
+  echo -e "${WHITE}Pushing to remote:${NC} git@github.com:$1/$2.git"
+  git push origin master > /dev/null 2>&1
+}
+
+function next_steps {
+  echo
+  echo "Next Steps"
+  echo "----------"
+  echo
+}
+
+function prompt_check_github {
+  echo -e "Go to ${WHITE}https://github.com/$1/$2${NC} to check your project"
+}
+
+
+clear
+make_dir ${repo_name}
+goto_dir ${repo_name}
+download_gitignore ${repo_name}
+download_readme ${repo_name}
+# download contribution md ?
+# download license ?
+git_init ${repo_name}
+git_add .
+git_commit ${COMMIT_MESG}
+
+create_remote_repo ${github_token} ${repo_name} ${repo_description} ${github_name}
+
+git_add_origin ${github_name} ${repo_name}
+git_push ${github_name} ${repo_name}
+
+next_steps
+prompt_check_github ${github_name} ${repo_name}
+echo
